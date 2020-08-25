@@ -5,56 +5,85 @@
 <h1> User Metrics</h1>
 {% endblock content_title %}
 
-{% block result_list %}
+
+
+{% block extra_obj %}
+
+
 <div class="results">
+
     <table>
-
-        <thead>
-            <tr>
-                <th>
-                    <div class="text">
-                        <a href="#">Category</a>
-                    </div>
-                </th>
-                <th>
-                    <div class="text">
-                        <a href="#">Total</a>
-                    </div>
-                </th>
-                <th>
-                    <div class="text">
-                        <a href="#">Total Sales</a>
-                    </div>
-                </th>
-                <th>
-                    <div class="text">
-                        <a href="#">
-                            <strong>% Of Total Sales</strong>
-                        </a>
-                    </div>
-                </th>
-            </tr>
-        </thead>
-
         <tbody>
-            {% for row in summary %}
-            <tr class="{% cycle 'row1' 'row2' %}">
-                <td> {{ row.sale__category__name }} </td>
-                <td> {{ row.total | intcomma }} </td>
-                <td> {{ row.total_sales | default:0 | intcomma }}$ </td>
-                <td>
-                    <strong>
-                        {{ row.total_sales |
-              default:0 |
-              percentof:summary_total.total_sales }}
-                    </strong>
-                </td>
+            <tr style="font-weight:bold; border-top:2px solid #DDDDDD;">
+                <td> Total number of users</td>
+                <td> {{ total.total }} </td>
             </tr>
-            {% endfor %}
         </tbody>
 
     </table>
+
+
+    <h2> Users over time </h2>
+
+    <style>
+        .bar-chart {
+            display: flex;
+            justify-content: space-around;
+            height: 160px;
+            padding-top: 60px;
+            overflow: hidden;
+        }
+
+        .bar-chart .bar {
+            flex: 100%;
+            align-self: flex-end;
+            margin-right: 2px;
+            position: relative;
+            background-color: #79aec8;
+        }
+
+        .bar-chart .bar:last-child {
+            margin: 0;
+        }
+
+        .bar-chart .bar:hover {
+            background-color: #417690;
+        }
+
+        .bar-chart .bar .bar-tooltip {
+            position: relative;
+            z-index: 999;
+        }
+
+        .bar-chart .bar .bar-tooltip {
+            position: absolute;
+            top: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            font-weight: bold;
+            opacity: 0;
+        }
+
+        .bar-chart .bar:hover .bar-tooltip {
+            opacity: 1;
+        }
+    </style>
+
+    <div class="results">
+        <div class="bar-chart">
+            {% for x in users_over_time %}
+            <div class="bar" style="height:{{x.pct}}%">
+                <div class="bar-tooltip">
+                    {{x.total | default:0 | intcomma }}<br>
+                    {{x.period | date:"d/m/Y"}}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
 </div>
 
-{% endblock result_list %}
+{% endblock extra_obj %}
 {% block pagination %}{% endblock %}
