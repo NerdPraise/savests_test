@@ -18,5 +18,12 @@ class User(AbstractUser):
     pass
 
 
-class UserMetrics(models.Model):
-    pass
+class Email(models.Model):
+    """"
+    To ensure safekeeping of mails sent, can be ignored
+    """
+    subject = models.CharField(max_length=30)
+    body = models.TextField()
+
+    def __str__(self):
+        return self.subject

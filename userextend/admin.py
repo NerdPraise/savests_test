@@ -5,14 +5,18 @@
 # Third party libraries
 
 # Django imports
-from django.contrib import admin
+from django.contrib import admin, messages
+from django.core.mail import send_mass_mail
 from django.db.models import Count, DateTimeField, Min, Max
-from django.utils.translation import ngettext
-from django.contrib import messages
 from django.db.models.functions import Trunc
+from django.shortcuts import redirect
+from django.template.response import TemplateResponse
+from django.utils.translation import ngettext
+from django.urls import path
 
 # Local imports
 from .models import User
+from .forms import SendMailForm
 
 
 def get_next_in_date_hierarchy(request, date_hierarchy):
@@ -34,7 +38,7 @@ class UserAdmin(admin.ModelAdmin):
     """
     list_display = ("username", "is_active",
                     "is_staff", "email", "date_joined")
-    change_list_template = "admin/userextend/admin/change_list.html"
+    change_list_template = "admin/userextend/change_list.html"
     list_filter = ("date_joined", "is_active", "is_staff")
     actions = ("set_active", "set_inactive",)
     date_hierarchy = 'date_joined'
@@ -59,6 +63,41 @@ class UserAdmin(admin.ModelAdmin):
 
     set_active.short_description = "Set users active"
     set_inactive.short_description = "Set users inactive"
+
+    def send_mail(self, request):
+        """
+        Method for mail sending functionality
+        """
+        if request.user.is_staff and request.user.is_superuser:
+            form = SendMailForm()
+            if request.method == "POST":
+                form = SendMailForm(request.POST)
+                if form.is_valid():
+                    subject = form.cleaned_data.get("subject")
+                    body = form.cleaned_data.get("body")
+
+                    users = User.objects.all()  # To prevent hitting the db several times on the for loop
+                    user_emails = [
+                        user.email for user in users if user.email != ""]
+                    message = (subject, body, "admin@admin.com", user_emails)
+                    send_mass_mail((message,), fail_silently=False)
+                    messages.success(request, "Messages sent Successfully")
+                    form.save()  # optional
+                    return redirect("admin:index")
+
+            else:
+                context = {
+                    "form": form,
+                    "user": request.user
+                }
+                return TemplateResponse(request, "userextend/send_mail.html", context)
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path("send_mail", self.send_mail, name="send-mail"),
+        ]
+        return custom_urls + urls
 
     def changelist_view(self, request, extra_context=None):
         response = super().changelist_view(

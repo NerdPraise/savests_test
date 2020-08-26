@@ -1,0 +1,55 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static crispy_forms_tags %}
+
+
+{% block extrahead %}
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+<title>SendMail</title>
+{{ block.super }}
+{{ media.js }}
+{% endblock %}
+
+{% block bodyclass %}{{ block.super }} app-{{ opts.app_label }} model-{{ opts.model_name }}
+delete-confirmation{% endblock %}
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+    &rsaquo; <a href="{% url 'admin:app_list' app_label='userextend' %}">{% trans "Users" %}</a>
+    &rsaquo; <span>Send email</span>
+</div>
+{% endblock %}
+
+{% block usertools %}
+{{block.super}}
+<div id="user-tools">
+    {% block welcome-msg %}
+    {{block.super}}
+    {% endblock %}
+    {% block userlinks %}
+    {{block.super}}
+    {% endblock %}
+</div>
+{% endblock %}
+
+
+{% block coltype %} {{ block.super }}
+flex{% endblock %}
+
+
+{% block content %}
+{{block.super}}
+<!-- Form for sending email to Email view -->
+<div class="container">
+    <div class="row">
+        <div class="col-8 col-md-8 mx-auto">
+            <form action="{% url 'admin:send-mail'%}" method="POST">
+                <h1>Send Mail to all</h1>
+                {% csrf_token %}
+                {{ form |crispy }}
+                <input type="submit" value="Send">
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

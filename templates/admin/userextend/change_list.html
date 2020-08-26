@@ -1,11 +1,18 @@
 {% extends "admin/change_list.html" %}
 {% load humanize %}
 
+
 {% block content_title %}
 <h1> User Metrics</h1>
 {% endblock content_title %}
 
-
+{% block object-tools %}
+{{ block.super }}
+<button onclick="location.href='{% url 'admin:send-mail'  %}'"
+    style="padding:12px; border-radius:5px;font-size:18px; background-color:#79AEC8; border:0; margin-bottom:10px">
+    Send mail
+</button>
+{% endblock %}
 
 {% block extra_obj %}
 
@@ -23,7 +30,7 @@
     </table>
 
 
-    <h2> Users over time </h2>
+    <h2>{% block trans %} Users over time (by {{ period}}) {% endblock trans %}</h2>
 
     <style>
         .bar-chart {
@@ -62,7 +69,7 @@
             transform: translateX(-50%);
             text-align: center;
             font-weight: bold;
-            opacity: 0;
+            opacity: 1;
         }
 
         .bar-chart .bar:hover .bar-tooltip {
